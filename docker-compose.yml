@@ -1,0 +1,6 @@
+layout-cache:
+  image: gennyproject/layout-cache
+  ports:
+    - "2223:2223"
+  environment:
+    - LAYOUT_REPO=https://github.com/genny-project/layouts.git
