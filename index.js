@@ -4,14 +4,23 @@ const fs = require( 'fs' );
 const rimraf = require( 'rimraf' );
 
 let repository = null;
+let PROXY_ON = false;
 
 rimraf('./tmp', () => {
   console.log( 'Deleted' );
   /* Fetch intially and then every minute */
-  fetch();
+  try {
+    fetch();
+  } catch ( e ) {
+    console.error( e );
+  }
 
   setInterval(() => {
-    pull();
+    try {
+      pull();
+    } catch ( e ) {
+      console.error( e );
+    }
   }, 60000);
 });
 
@@ -62,5 +71,11 @@ app.use(( req, res, next ) => {
 });
 
 app.use(express.static('./tmp'));
+
+app.post( '/switch-to-local', ( req, res ) => {
+  PROXY_ON = true;
+  res.json({ proxyOn: PROXY_ON });
+  return;
+});
 
 app.listen(2223, () => console.log('Layout cache listening on port 2223!'));
