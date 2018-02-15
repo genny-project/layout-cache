@@ -5,6 +5,7 @@ const rimraf = require( 'rimraf' );
 
 let repository = null;
 let PROXY_ON = false;
+const branch_name = process.env.NODE_ENV == 'production' ? 'master' : 'dev';
 
 rimraf('./tmp', () => {
   console.log( 'Deleted' );
@@ -37,7 +38,7 @@ function pull() {
     return repository.fetchAll();
   })
   .then(function() {
-    return repository.mergeBranches( 'master', 'origin/master' );
+    return repository.mergeBranches( `${branch_name}`, `origin/${branch_name}` );
   })
   .done(function() {
     console.log("Pull complete");
