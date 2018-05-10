@@ -60,6 +60,7 @@ app.use(( req, res, next ) => {
         res.json(files.map( f => ({
           name: f,
           download_url: `${req.protocol}://${req.get('host')}${req.originalUrl}/${f}`,
+          path: `${req.originalUrl}/${f}`,
         })));
       });
       return;
