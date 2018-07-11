@@ -2,6 +2,7 @@
 const simpleGit = require('simple-git/promise')('/tmp');
 const fs = require( 'fs' );
 const rimraf = require( 'rimraf' );
+var crypto = require('crypto');
 
 let repository = null;
 const branch_name = process.env.NODE_ENV == 'production' ? 'master' : 'dev';
@@ -72,6 +73,8 @@ app.use(( req, res, next ) => {
         res.json(files.map( f => ({
           name: f,
           download_url: `${req.protocol}://${req.get('host')}${req.originalUrl}/${f}`,
+          path: `${req.originalUrl}/${f}`,
+          modified_date: fs.statSync(`/tmp/layouts${req.originalUrl}/${f}`).mtime
         })));
       });
       return;
