@@ -22,6 +22,11 @@ setInterval(() => {
 }, 60000);
 
 function fetch() {
+  /* Check whether we are in dev mode. If so do nothing */
+  if ( process.env.DEV === 'true' ) {
+    return;
+  }
+
   simpleGit.clone( process.env.LAYOUT_REPO )
   .then(() => {
     console.log( 'Successfully cloned layouts repo' );
@@ -39,6 +44,12 @@ function fetch() {
 }
 
 function pull() {
+  /* Check whether we are in dev mode. If so do nothing */
+  if ( process.env.DEV === 'true' ) {
+    return;
+  }
+
+  /* Sync the required branch from Git */
   simpleGit.cwd( '/tmp/layouts' ).then(() => {
     simpleGit.pull( branch_name ).then(() => {
       console.log( `Updated ${branch_name}` );
@@ -46,9 +57,11 @@ function pull() {
   });
 }
 
+/* Create a new Express HTTP server */
 const express = require('express');
 const app = express();
 
+/* Serve up layouts from the local directory */
 app.use(( req, res, next ) => {
   /* Check whether the path is a folder */
   try {
@@ -74,4 +87,5 @@ app.use(( req, res, next ) => {
 
 app.use(express.static('/tmp/layouts'));
 
+/* Listen on port 2223 */
 app.listen(2223, () => console.log('Layout cache listening on port 2223!'));
