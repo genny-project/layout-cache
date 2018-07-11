@@ -4,7 +4,6 @@ const fs = require( 'fs' );
 const rimraf = require( 'rimraf' );
 
 let repository = null;
-let PROXY_ON = false;
 const branch_name = process.env.NODE_ENV == 'production' ? 'master' : 'dev';
 
 /* Fetch intially and then every minute */
@@ -74,11 +73,5 @@ app.use(( req, res, next ) => {
 });
 
 app.use(express.static('/tmp/layouts'));
-
-app.post( '/switch-to-local', ( req, res ) => {
-  PROXY_ON = true;
-  res.json({ proxyOn: PROXY_ON });
-  return;
-});
 
 app.listen(2223, () => console.log('Layout cache listening on port 2223!'));
