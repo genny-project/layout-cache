@@ -1,0 +1,8 @@
+layout-cache:
+  image: gennyproject/layout-cache
+  ports:
+    - "2223:2223"
+  volumes:
+    - ~/genny-project/layouts:/tmp/layouts
+  environment:
+    - DEV=true
