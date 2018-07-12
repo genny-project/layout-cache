@@ -61,6 +61,9 @@ function pull() {
 /* Create a new Express HTTP server */
 const express = require('express');
 const app = express();
+const cors = require('cors');
+
+app.use(cors());
 
 /* Serve up layouts from the local directory */
 app.use(( req, res, next ) => {
