@@ -11,7 +11,12 @@
     "cors": "^2.8.4",
     "express": "^4.16.2",
     "rimraf": "^2.6.2",
-    "simple-git": "^1.89.0"
+    "simple-git": "^1.89.0",
+    "babel-eslint": "^8.0.2",
+    "eslint": "^4.11.0",
+    "eslint-plugin-babel": "^4.1.2",
+    "eslint-plugin-flowtype": "^2.39.1",
+    "eslint-plugin-mocha": "^4.11.0"
   },
   "author": "",
   "license": "ISC"

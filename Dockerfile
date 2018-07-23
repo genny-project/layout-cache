@@ -1,4 +1,4 @@
-FROM node:9
+FROM node:10-stretch
 
 # Create app directory
 WORKDIR /usr/src/app
@@ -16,6 +16,9 @@ RUN npm install
 
 # Bundle app source
 ADD . .
+
+RUN mkdir ~/.ssh
+RUN echo "Host *\nStrictHostKeyChecking no\nUserKnownHostsFile=/dev/null" > ~/.ssh/config
 
 EXPOSE 2223
 CMD [ "npm", "start" ]
