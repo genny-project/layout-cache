@@ -32,8 +32,7 @@ function fetch( url, callback ) {
   }
 
   if ( !url ) {
-    callback();
-    return;
+    url = 'https://github.com/genny-project/layouts.git';
   }
 
   if ( repos[url] ) {
