@@ -1,6 +1,6 @@
 /* Include dependencies */
 const simpleGit = require( 'simple-git/promise' )( '/tmp' );
-const fs = require( 'fs' );
+const fs = require( 'fs-extra' );
 
 /* Create an object to store the status of the repos */
 const repos = {};
@@ -41,7 +41,7 @@ function fetch( url, callback ) {
   }
 
   /* Get a name for the repo */
-  const repoName = url.split( '/' )[1].split( '.git' )[0];
+  const repoName = url.split( '/' )[url.split( '/' ).length - 1].split( '.git' )[0];
 
   /* Clone the repo */
   const git = getGit();
@@ -54,6 +54,14 @@ function fetch( url, callback ) {
           git.checkout( branch_name ).then(() => {
             console.log( 'Pulled branch', branch_name );
             repos[url] = true;
+            if ( url !== 'https://github.com/genny-project/layouts.git' ) {
+              fs.copy( '/tmp/layouts/shared', `/tmp/${repoName}/shared`, err => {
+                if ( err ) {
+                  console.error( err );
+                }
+              });
+            }
+
             callback();
 
             /* Pull this repo every minute moving forwards */
@@ -78,6 +86,13 @@ function pull( url ) {
   git.cwd( `/tmp/${repoName}` ).then(() => {
     git.pull( branch_name ).then(() => {
       console.log( `Updated ${branch_name}` );
+      if ( url !== 'https://github.com/genny-project/layouts.git' ) {
+        fs.copy( '/tmp/layouts/shared', `/tmp/${repoName}/shared`, err => {
+          if ( err ) {
+            console.error( err );
+          }
+        });
+      }
     });
   });
 }
@@ -89,43 +104,51 @@ const cors = require( 'cors' );
 
 app.use( cors());
 
+/* When the app starts fetch the public repo */
+
 /* Serve up layouts from the local directory */
 app.use(( req, res ) => {
   let basePath = '/tmp/layouts';
 
-  /* Fetch the repo if needed */
-  fetch( req.query.url, () => {
-    /* Check whether the path is a folder */
-    try {
-      const isDir = fs.lstatSync( `${basePath}${req.path.split( '?' )[0]}` ).isDirectory();
-      if ( isDir ) {
-        /* Get all of the files in the directory */
-        fs.readdir( `${basePath}${req.path.split( '?' )[0]}`, ( err, files ) => {
-          res.json( files.map( f => ({
-            name: f,
-            download_url: `${req.protocol}://${req.get( 'host' )}${req.originalUrl.split( '?' )[0]}/${f}`,
-            path: `${req.originalUrl.split( '?' )[0]}/${f}`,
-            modified_date: fs.statSync( `${basePath}${req.originalUrl.split( '?' )[0]}/${f}` ).mtime
-          })));
-        });
-        return;
-      } else {
-        /* Read the file */
-        fs.readFile( `${basePath}${req.path.split( '?' )[0]}`, ( err, result ) => {
-          if ( err || !result ) {
-            res.status( 404 );
-            res.json({ error: 'File / folder not found' });
-            return;
-          }
+  if ( req.query.url ) {
+    basePath = `/tmp/${req.query.url.split( '/' )[1].split( '.git' )[0]}`;
+  }
 
-          res.send( result );
-        });
+  /* Fetch the repo if needed */
+  fetch( 'https://github.com/genny-project/layouts.git', () => {
+    fetch( req.query.url, () => {
+      /* Check whether the path is a folder */
+      try {
+        const isDir = fs.lstatSync( `${basePath}${req.path.split( '?' )[0]}` ).isDirectory();
+        if ( isDir ) {
+          /* Get all of the files in the directory */
+          fs.readdir( `${basePath}${req.path.split( '?' )[0]}`, ( err, files ) => {
+            res.json( files.map( f => ({
+              name: f,
+              download_url: `${req.protocol}://${req.get( 'host' )}${req.originalUrl.split( '?' )[0]}/${f}`,
+              path: `${req.originalUrl.split( '?' )[0]}/${f}`,
+              modified_date: fs.statSync( `${basePath}${req.originalUrl.split( '?' )[0]}/${f}` ).mtime
+            })));
+          });
+          return;
+        } else {
+          /* Read the file */
+          fs.readFile( `${basePath}${req.path.split( '?' )[0]}`, ( err, result ) => {
+            if ( err || !result ) {
+              res.status( 404 );
+              res.json({ error: 'File / folder not found' });
+              return;
+            }
+
+            res.send( result );
+          });
+        }
+      } catch ( e ) {
+        res.status( 404 );
+        res.json({ error: 'File / folder not found' });
+        return;
       }
-    } catch ( e ) {
-      res.status( 404 );
-      res.json({ error: 'File / folder not found' });
-      return;
-    }
+    });
   });
 });
 
