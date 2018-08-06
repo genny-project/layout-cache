@@ -2,6 +2,7 @@ layout-cache:
   image: gennyproject/layout-cache
   ports:
     - "2223:2223"
+    - "2224:2224"
   volumes:
     - ~/genny-project/layouts:/tmp/layouts
   environment:

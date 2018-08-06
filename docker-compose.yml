@@ -2,7 +2,8 @@ layout-cache:
   image: gennyproject/layout-cache
   ports:
     - "2223:2223"
+    - "2224:2224"
   environment:
     - LAYOUT_REPO=https://github.com/genny-project/layouts.git
     - GIT_SSH=/usr/src/app/GIT_SSH
-    - SSH_PRIVATE_KEY=INSERT_HERE
+    - SSH_PRIVATE_KEY=SSH_KEY_HERE
