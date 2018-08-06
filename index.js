@@ -154,3 +154,6 @@ app.use(( req, res ) => {
 
 /* Listen on port 2223 */
 app.listen( 2223, () => console.log( 'Layout cache listening on port 2223!' ));
+
+/* Include the public server */
+require( './public.js' );
