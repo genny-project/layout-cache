@@ -21,7 +21,7 @@ app.get( '/public', ( req, res ) => {
   }
 
   /* Attempt to read the public routing file */
-  fs.readFile( `${basePath}/public/routing.public.json`, ( err, data ) => {
+  fs.readFile( `${basePath}/routing.public.json`, ( err, data ) => {
     /* If an error occured then return it */
     if ( err ) {
       res.status( 500 );
@@ -47,7 +47,7 @@ app.get( '/public', ( req, res ) => {
     }
 
     /* Loop over each file in the parsed file */
-    const files = parsed.map( entry => readJSONFile( `${basePath}/public/${entry.path}` ));
+    const files = parsed.map( entry => readJSONFile( `${basePath}/${entry.path}` ));
 
     Promise.all( files ).then( result => {
       res.json( parsed.map(( entry, index ) => {
