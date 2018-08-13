@@ -20,6 +20,10 @@ app.get( '/public', ( req, res ) => {
       : `/tmp/${req.query.url.split( '/' )[1].split( '.git' )[0]}`;
   }
 
+  if ( req.query.directory ) {
+    basePath = `/tmp/${req.query.directory}`;
+  }
+
   /* Attempt to read the public routing file */
   fs.readFile( `${basePath}/routing.public.json`, ( err, data ) => {
     /* If an error occured then return it */
