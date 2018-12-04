@@ -20,5 +20,7 @@ ADD . .
 RUN mkdir ~/.ssh
 RUN echo "Host *\nStrictHostKeyChecking no\nUserKnownHostsFile=/dev/null" > ~/.ssh/config
 
+HEALTHCHECK --interval=10s --timeout=10s --retries=15 CMD curl -f / http://localhost:2223 || exit 1
+
 EXPOSE 2223
 CMD [ "npm", "start" ]
