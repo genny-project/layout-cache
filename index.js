@@ -8,6 +8,9 @@ const repos = {};
 /* Define what branch we are using based on the environment variable */
 const branch_name = process.env.NODE_ENV == 'production' ? 'master' : 'dev';
 
+/* Get the URL of the repo */
+const GIT_REPO = process.env.LAYOUT_REPO || 'https://github.com/genny-project/layouts.git';
+
 /* Setup the authentication if provided */
 if ( process.env.SSH_PRIVATE_KEY ) {
   /* Write the private key to file */
@@ -22,6 +25,11 @@ function getGit() {
   return simpleGit;
 }
 
+/* Returns a unique repo identifier from the name */
+function getRepoName( url ) {
+  return url.split( '/' )[url.split( '/' ).length - 1].split( '.git' )[0];
+}
+
 /* Fetches from a particular repo */
 function fetch( url, callback ) {
   console.log( url );
@@ -32,7 +40,7 @@ function fetch( url, callback ) {
   }
 
   if ( !url ) {
-    url = 'https://github.com/genny-project/layouts.git';
+    url = GIT_REPO;
   }
 
   if ( repos[url] ) {
@@ -41,7 +49,7 @@ function fetch( url, callback ) {
   }
 
   /* Get a name for the repo */
-  const repoName = url.split( '/' )[url.split( '/' ).length - 1].split( '.git' )[0];
+  const repoName = getRepoName( url );
 
   /* Clone the repo */
   const git = getGit();
@@ -54,7 +62,7 @@ function fetch( url, callback ) {
           git.checkout( branch_name ).then(() => {
             console.log( 'Pulled branch', branch_name );
             repos[url] = true;
-            if ( url !== 'https://github.com/genny-project/layouts.git' ) {
+            if ( url !== GIT_REPO ) {
               fs.copy( '/tmp/layouts/shared', `/tmp/${repoName}/shared`, err => {
                 if ( err ) {
                   console.error( err );
@@ -67,7 +75,7 @@ function fetch( url, callback ) {
             /* Pull this repo every minute moving forwards */
             setInterval(() => {
               pull( url );
-            }, 60000 );
+            }, process.env.SYNC_INTERVAL || 60000 );
           });
         });
       });
@@ -81,12 +89,12 @@ function pull( url ) {
   const git = getGit();
 
   /* Get a name for the repo */
-  const repoName = url.split( '/' )[1].split( '.git' )[0];
+  const repoName = getRepoName( url );
 
   git.cwd( `/tmp/${repoName}` ).then(() => {
     git.pull( branch_name ).then(() => {
       console.log( `Updated ${branch_name}` );
-      if ( url !== 'https://github.com/genny-project/layouts.git' ) {
+      if ( url !== GIT_REPO ) {
         fs.copy( '/tmp/layouts/shared', `/tmp/${repoName}/shared`, err => {
           if ( err ) {
             console.error( err );
@@ -115,7 +123,7 @@ app.use(( req, res ) => {
   }
 
   /* Fetch the repo if needed */
-  fetch( 'https://github.com/genny-project/layouts.git', () => {
+  fetch( GIT_REPO, () => {
     fetch( req.query.url, () => {
 
     });
@@ -159,3 +167,6 @@ app.listen( 2223, () => console.log( 'Layout cache listening on port 2223!' ));
 
 /* Include the public server */
 require( './public.js' );
+
+/* When the app starts fetch the repo */
+fetch( GIT_REPO, () => {});
